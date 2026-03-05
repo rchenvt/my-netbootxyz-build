@@ -1,0 +1,29 @@
+services:
+  xyz:
+    container_name: xyz
+    image: ghcr.ig/rchenvt/xyz:latest
+#    build:
+#      context: .
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - DHCP_RANGE_START=${SUBNET:-192.168.0.0}
+      - CONTAINER_IP=${CONTAINER_IP:-192.168.0.50}
+    networks:
+      xyz_network:
+        ipv4_address: ${CONTAINER_IP:-192.168.0.50}
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./config:/config # optional
+      - ./assets:/assets # optional
+networks:
+  xyz_network:
+    driver: ipvlan
+    driver_opts:
+      parent: ${INTERFACE:-eth0}
+    ipam:
+      config:
+        - subnet: ${SUBNET:-192.168.0.0}/${SUBNET_PREFIX_BITS:-24}
+          gateway: ${GATEWAY:-192.168.0.1}
+          ip_range: ${CONTAINER_IP:-192.168.0.50}/32
